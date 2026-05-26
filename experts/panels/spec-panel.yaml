@@ -29,7 +29,7 @@ focus-areas:
 
 default-experts: [karl-wiegers, gojko-adzic, martin-fowler, lisa-crispin]
 
-max-experts: 6
+max-experts: 7
 
 auto-select:
   - keywords: [api, rest, graphql, microservice, distributed]
@@ -40,6 +40,22 @@ auto-select:
     add: [gregor-hohpe]
   - keywords: [reliability, failure, circuit, resilience, production]
     add: [michael-nygard]
+  - keywords: [llm, prompt, codex, claude, gpt, agent, ai, model, hook, rag, embedding]
+    add: [simon-willison]
+  - keywords: [cli, external, third-party, adapter, container, telemetry, observability, sre]
+    add: [charity-majors]
+
+# Mandatory pre-scoring checks (deterministic, not LLM-delegated)
+pre-scoring-checks:
+  - name: table-reconciliation
+    description: |
+      Before any expert scores, extract every numeric claim from the spec's tables
+      (counts, totals, "≥ N", "= N", "exactly N"). For each numeric claim, verify
+      it reconciles with the enumerated items in other sections. Flag arithmetic
+      mismatches as CRITICAL findings BEFORE expert deliberation begins. This
+      compensates for the known LLM failure mode of hallucinating arithmetic
+      consistency over freeform tables.
+    when: spec contains 2+ tables with numeric values
 
 scoring:
   min: 0
@@ -54,6 +70,44 @@ scoring:
       description: "Measurability and validation capability"
     - name: consistency
       description: "Internal coherence and contradiction detection"
+
+  # Production-readiness dimensions — applied ONLY when the spec describes
+  # an LLM-app, multi-agent pipeline, spec-gated workflow, or AI-driven tool.
+  # Trigger keywords overlap with the simon-willison / charity-majors auto-select rules above.
+  # Source: ~/projects/00_Governance/PRODUCTION-READINESS-CHECKLIST.md §3, §4, §8.
+  # Cross-cutting failures (KP-3681..3685, section 48) inform the rubric.
+  ai-production-dimensions:
+    enabled-when:
+      any-keyword: [llm, prompt, codex, claude, gpt, agent, rag, embedding, multi-agent, pipeline, model]
+    pass-threshold: 7.0
+    dimensions:
+      - name: output-integrity
+        description: |
+          Are outputs validated against a written schema before downstream use?
+          Are tool-internal artifacts in LLM output (<thinking>, **Drafting**, reasoning
+          preambles) detected and stripped or treated as validation failures? Are
+          multi-source file writes atomic (tempfile + rename, not append-and-pray)?
+          Does the system refuse malformed output rather than producing slightly-wrong
+          output that propagates silently?
+        source: "PRODUCTION-READINESS-CHECKLIST.md §3"
+      - name: isolation-enforcement
+        description: |
+          When the design depends on agents being "independent", is that independence
+          TECHNICALLY ENFORCED (separate processes, filesystems, context windows) or
+          merely prompt-instructed (anti-pattern KP-3682)? When a shared resource exists
+          (context bundle, scratch dir, message bus), are the symmetry constraints
+          documented? Are sycophancy / framing / position effects between agents
+          acknowledged and either measured or mitigated by architecture?
+        source: "PRODUCTION-READINESS-CHECKLIST.md §4"
+      - name: security-boundaries
+        description: |
+          Are "read-only" claims backed by OS-level enforcement (immutable bind-mount,
+          chmod a-w, separate user) OR labeled "intended read-only, not hard-enforced"?
+          Are third-party plugins / MCP servers / extensions inventoried with bounded
+          write surface? Are mode transitions (one mode has FS access, another
+          restricts it) auditable? Is there defense-in-depth — at least two
+          independent layers stop the worst-case write/leak, not one?
+        source: "PRODUCTION-READINESS-CHECKLIST.md §8"
 
 output:
   default-format: standard
