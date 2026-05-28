@@ -1,0 +1,96 @@
+name: security-panel
+description: "Multi-expert security review — threat modeling, trust boundaries, secrets handling, supply chain, prompt injection, and incident response"
+
+modes:
+  - discussion
+  - critique
+  - socratic
+  - debate
+
+focus-areas:
+  - name: threat-model
+    description: "Adversary modeling, attack surface enumeration, trust zones, asset classification, what-can-go-wrong analysis"
+    lead: filippo-valsorda
+    experts: [filippo-valsorda, michael-nygard, simon-willison]
+
+  - name: secrets
+    description: "Credential storage, rotation, transit, blast-radius limitation, OAuth/JWT lifecycle, env-var hygiene"
+    lead: filippo-valsorda
+    experts: [filippo-valsorda, kelsey-hightower, charity-majors]
+
+  - name: llm-security
+    description: "Prompt injection, indirect injection via untrusted data, output sanitization, tool-use authorization, agent trust boundaries"
+    lead: simon-willison
+    experts: [simon-willison, filippo-valsorda, michael-nygard]
+
+  - name: data-handling
+    description: "PII classification, GDPR boundaries, retention, deletion paths, subject-access requests, taxonomy at ingest"
+    lead: filippo-valsorda
+    experts: [filippo-valsorda, charity-majors]
+
+  - name: resilience
+    description: "Incident response, blast-radius, detection latency, post-mortem discipline, fault isolation, supply-chain dependencies"
+    lead: michael-nygard
+    experts: [michael-nygard, charity-majors, kelsey-hightower]
+
+default-experts: [filippo-valsorda, michael-nygard, simon-willison, charity-majors]
+
+max-experts: 6
+
+auto-select:
+  - keywords: [oauth, jwt, token, api-key, secret, credential, rotation]
+    add: [filippo-valsorda, kelsey-hightower]
+  - keywords: [prompt-injection, jailbreak, llm, agent, tool-use, mcp, rag]
+    add: [simon-willison]
+  - keywords: [pii, gdpr, dsgvo, deletion, retention, classification, subject]
+    add: [filippo-valsorda]
+  - keywords: [scrape, scraper, untrusted, third-party, plugin, external-input]
+    add: [simon-willison, filippo-valsorda]
+  - keywords: [incident, post-mortem, blast-radius, detection, mttr, on-call]
+    add: [michael-nygard, charity-majors]
+  - keywords: [container, kubernetes, deploy, infra, sandbox, namespace, syscall]
+    add: [kelsey-hightower]
+  - keywords: [supply-chain, dependency, sbom, cve, vulnerability, transitive]
+    add: [filippo-valsorda, kelsey-hightower]
+  - keywords: [migration, schema, sql, injection, parameter, escape]
+    add: [filippo-valsorda]
+
+# Mandatory pre-scoring checks (deterministic, not LLM-delegated)
+pre-scoring-checks:
+  - name: secret-leak-scan
+    description: |
+      Before any expert scores, scan the diff/spec for literal secrets — API keys, tokens,
+      private keys, connection strings with embedded credentials, .env contents inlined
+      into code. Use shape-based detection (high-entropy strings near `key=`, `token=`,
+      `password=`, `Authorization:`, AWS-style `AKIA*`, GitHub `ghp_*`, OpenAI `sk-*`).
+      Any match is a CRITICAL finding flagged up front, regardless of expert opinion.
+    when: spec/diff contains code or config files
+
+  - name: trust-boundary-inventory
+    description: |
+      Before scoring, enumerate every external data ingress (HTTP body, file upload,
+      scraped page, LLM output, env var sourced from third-party, plugin input).
+      For each, note whether the design specifies a validation/classification step
+      before the data crosses into business logic. Missing boundary checks become
+      MAJOR findings before deliberation.
+    when: spec describes data ingestion or plugin/adapter architecture
+
+scoring:
+  min: 0
+  max: 10
+  pass-threshold: 7.0
+  dimensions:
+    - name: threat-model-coverage
+      description: "Are adversaries named, assets classified, attack surface enumerated; or is 'security' deferred to a future phase"
+    - name: secrets-discipline
+      description: "Are secrets stored, transported, rotated, and scoped correctly; is the blast radius of a leaked credential bounded"
+    - name: trust-boundary-enforcement
+      description: "Are trust zones explicit and validated at ingress; or is 'we control both sides' used as justification for skipping isolation"
+    - name: failure-and-detection
+      description: "Are detection paths and incident-response procedures specified; can a compromise be observed and contained, not just postulated"
+
+output:
+  default-format: standard
+  include-scores: true
+  include-roadmap: true
+  include-consensus: true
