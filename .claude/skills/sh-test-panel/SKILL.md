@@ -84,3 +84,23 @@ Test strategy review document containing:
 - Priority-ranked improvements
 
 **SYNTHESIS ONLY** — this panel produces analysis and recommendations. It does not author or modify test code without explicit instruction. Per `00_Governance/CLAUDE.md §8 Panel Auto-Fix Policy`, downstream auto-fix consumers MAY apply the recommendations across all severities; this skill itself surfaces them.
+
+## Output Contract (machine-readable verdict)
+
+The quality gate (`quality_gate.run_stage3_panel`) consumes this panel via
+`claude -p` and reads the **score from stdout, not the exit code**. Therefore
+the **final line** of your output MUST be exactly one of:
+
+```
+PANEL-VERDICT: <overall_score>
+PANEL-VERDICT: FAIL: <machine_reason>
+```
+
+- `<overall_score>` is the numeric overall score (0–10, one decimal — e.g. `8.3`).
+  The gate applies the pass threshold (default 7.0); do NOT pre-apply it — just
+  report the score you computed.
+- Use the `FAIL: <machine_reason>` form only when no score could be produced
+  (structural failure) — snake_case naming the first blocker (e.g.
+  `no_content`, `panel_config_missing`, `experts_unavailable`).
+- Emit the line literally, on its own line, as the last meaningful output.
+  Omitting it makes the gate fail-closed with `panel_no_verdict` (inconclusive).
