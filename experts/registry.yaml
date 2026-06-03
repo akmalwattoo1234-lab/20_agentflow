@@ -1,6 +1,6 @@
 # Expert Registry — Auto-generated
 # Run: ./scripts/rebuild-registry.sh to regenerate
-# Last rebuilt: 2026-05-20
+# Last rebuilt: 2026-06-03
 
 panels:
   ai-panel:
@@ -15,9 +15,21 @@ panels:
     description: "Multi-expert business analysis — strategic review and recommendations"
     default-experts: [michael-porter, clayton-christensen, peter-drucker, nassim-taleb]
 
+  consigliere-panel:
+    description: "Multi-expert intelligence-pipeline review — 6 focus areas: discovery-quality, ingestion-resilience, scoring-validity, platform-compliance, taxonomy-coherence, cost-efficiency"
+    default-experts: [dj-patil, jay-kreps, deborah-mcguinness, filippo-valsorda, mike-mason, michael-nygard]
+
   mobile-panel:
     description: "Multi-expert mobile/native app specification review — Android, iOS, Swift, SwiftUI"
     default-experts: [jake-wharton, chris-lattner, john-sundell, chris-banes]
+
+  personal-development-panel:
+    description: "Multi-expert personal-development review — learnability, adoption, human-centeredness, capability impact for talent/learning/AI-augmentation designs"
+    default-experts: [dave-ulrich, malcolm-knowles, jeff-hiatt, erik-brynjolfsson, amy-edmondson, ravin-jesuthasan, josh-bersin]
+
+  security-panel:
+    description: "Multi-expert security review — threat modeling, trust boundaries, secrets handling, supply chain, prompt injection, and incident response"
+    default-experts: [filippo-valsorda, michael-nygard, simon-willison, charity-majors]
 
   spec-panel:
     description: "Multi-expert specification review — quality gate for Refining → Ready"
@@ -50,6 +62,7 @@ packs:
 
 experts:
   alistair-cockburn: { domain: "Use case methodology, agile requirements", panels: [spec], token-cost: 280 }
+  amy-edmondson: { domain: "Psychological safety & teaming", panels: [personal-development], token-cost: 330 }
   andrej-karpathy: { domain: "Neural network training, LLM internals, practical deep learning", panels: [ai], token-cost: 320 }
   charity-majors: { domain: "Observability, sociotechnical operations, empiricism over speculation", panels: [spec], token-cost: 320 }
   chet-haase: { domain: "Android animations, UI performance, transitions, frame rate optimization", panels: [mobile], token-cost: 280 }
@@ -58,33 +71,45 @@ experts:
   chris-lattner: { domain: "Swift language design, compiler architecture, cross-platform patterns, LLVM", panels: [mobile], token-cost: 300 }
   christopher-olah: { domain: "Mechanistic interpretability, circuits, features in neural networks", panels: [ai], token-cost: 290 }
   clayton-christensen: { domain: "Disruption theory, innovation strategy", panels: [business], token-cost: 300 }
+  dave-ulrich: { domain: "HR & talent architecture", panels: [personal-development], token-cost: 340 }
+  deborah-mcguinness: { domain: "Ontology engineering and taxonomy coherence", panels: [spec, consigliere], token-cost: 310 }
+  dj-patil: { domain: "Data-product design and scoring validity", panels: [ai, consigliere], token-cost: 300 }
   donella-meadows: { domain: "Systems thinking, leverage points", panels: [business], token-cost: 280 }
   emily-bender: { domain: "Computational linguistics, the limits of language models, AI claim discipline", panels: [ai], token-cost: 290 }
+  erik-brynjolfsson: { domain: "AI enablement & future of work", panels: [personal-development], token-cost: 340 }
+  filippo-valsorda: { domain: "Applied cryptography, trust boundaries, PII/secrets handling", panels: [consigliere], token-cost: 290 }
   francois-chollet: { domain: "Generalization, abstraction, reasoning, evaluation of intelligence", panels: [ai], token-cost: 320 }
   gojko-adzic: { domain: "Specification by Example, living documentation", panels: [spec], token-cost: 300 }
   gregor-hohpe: { domain: "Enterprise integration patterns, messaging, data flow", panels: [spec], token-cost: 280 }
   jake-wharton: { domain: "Android platform, Kotlin, performance, JNI, Gradle build system", panels: [mobile], token-cost: 320 }
   janet-gregory: { domain: "Collaborative testing, specification workshops, quality practices", panels: [spec], token-cost: 250 }
   jared-kaplan: { domain: "Neural scaling laws, compute-optimal training, model size vs data trade-offs", panels: [ai], token-cost: 280 }
+  jay-kreps: { domain: "Event streaming, log-centric architecture, delivery semantics", panels: [spec, consigliere], token-cost: 300 }
   jeanluc-doumont: { domain: "Structured communication, clarity in technical writing", panels: [business], token-cost: 250 }
+  jeff-hiatt: { domain: "Change management (individual transition)", panels: [personal-development], token-cost: 330 }
   jim-collins: { domain: "Organizational excellence, enduring greatness", panels: [business], token-cost: 280 }
   john-sundell: { domain: "SwiftUI, iOS app architecture, app lifecycle, design patterns", panels: [mobile], token-cost: 300 }
+  josh-bersin: { domain: "Enterprise L&D & HR technology", panels: [personal-development], token-cost: 340 }
   karl-wiegers: { domain: "Requirements engineering", panels: [spec], token-cost: 350 }
   kelsey-hightower: { domain: "Cloud native, Kubernetes, operational excellence", panels: [spec, mobile], token-cost: 280 }
   lisa-crispin: { domain: "Agile testing, quality requirements, test automation", panels: [spec], token-cost: 280 }
+  malcolm-knowles: { domain: "Adult learning (andragogy)", panels: [personal-development], token-cost: 330 }
   martin-fowler: { domain: "Software architecture, design patterns, API design", panels: [spec], token-cost: 320 }
+  martin-kleppmann: { domain: "Distributed systems, data-intensive applications, consistency models", panels: [spec, consigliere], token-cost: 320 }
   mattt-thompson: { domain: "App Store / Play Store guidelines, API design, distribution, Apple ecosystem", panels: [mobile], token-cost: 280 }
   michael-nygard: { domain: "Production systems, reliability, failure modes", panels: [spec], token-cost: 300 }
   michael-porter: { domain: "Competitive strategy, market positioning", panels: [business], token-cost: 300 }
+  mike-mason: { domain: "Pragmatic data engineering, cost-vs-value trade-offs in ingest pipelines", panels: [consigliere], token-cost: 280 }
   nassim-taleb: { domain: "Risk management, antifragility, uncertainty", panels: [business], token-cost: 320 }
   peter-drucker: { domain: "Management philosophy, effectiveness", panels: [business], token-cost: 280 }
+  ravin-jesuthasan: { domain: "Skills-based organization & work design", panels: [personal-development], token-cost: 340 }
   romain-guy: { domain: "Android rendering, OpenGL ES, GPU performance, SurfaceView, NDK graphics", panels: [mobile], token-cost: 320 }
   sam-newman: { domain: "Distributed systems, service boundaries, API evolution", panels: [spec], token-cost: 280 }
   seth-godin: { domain: "Marketing innovation, tribe building", panels: [business], token-cost: 280 }
   simon-willison: { domain: "LLM security, prompt injection, AI tool design", panels: [spec], token-cost: 320 }
-  stuart-russell: { domain: "AI safety, value alignment, agent design under uncertainty", panels: [ai], token-cost: 290 }
+  stuart-russell: { domain: "AI safety, value alignment, agent design under uncertainty", panels: [ai, personal-development], token-cost: 290 }
   timnit-gebru: { domain: "AI ethics, dataset documentation, fairness, accountability", panels: [ai], token-cost: 290 }
   wckim-mauborgne: { domain: "Blue Ocean Strategy, market creation", panels: [business], token-cost: 300 }
 
-total-experts: 36
-total-token-budget: 10640
+total-experts: 49
+total-token-budget: 14790

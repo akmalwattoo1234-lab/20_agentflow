@@ -3,7 +3,7 @@ name: "Stuart Russell"
 slug: stuart-russell
 domain: "AI safety, value alignment, agent design under uncertainty"
 methodology: "Provably beneficial AI; cooperative inverse reinforcement learning; objective uncertainty; assistance games"
-panels: [ai]
+panels: [ai, personal-development]
 packs: []
 keywords: [alignment, agent, autonomous, safety, objective, reward-hacking, deception, oversight, off-switch]
 token-cost: 290

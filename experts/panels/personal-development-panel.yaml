@@ -1,0 +1,70 @@
+name: personal-development-panel
+description: "Multi-expert personal-development review — learnability, adoption, human-centeredness, capability impact for talent/learning/AI-augmentation designs"
+
+modes:
+  - discussion
+  - critique
+  - socratic
+
+focus-areas:
+  - name: learnability
+    description: "Adult-learning fit: why-now framing, learner agency, problem-centered design"
+    lead: malcolm-knowles
+    experts: [malcolm-knowles, dave-ulrich]
+
+  - name: adoption
+    description: "Will real people adopt and sustain the behavior — ADKAR rungs and psychological safety"
+    lead: jeff-hiatt
+    experts: [jeff-hiatt, amy-edmondson]
+
+  - name: human-centeredness
+    description: "Trust, safety, augmentation-over-replacement — does the human stay central"
+    lead: amy-edmondson
+    experts: [amy-edmondson, erik-brynjolfsson]
+
+  - name: capability
+    description: "Capability spine integrity, work deconstruction, individual→org→value line of sight"
+    lead: ravin-jesuthasan
+    experts: [ravin-jesuthasan, dave-ulrich, erik-brynjolfsson, josh-bersin]
+
+# All seven seated by default (Bersin locked in as default per roster decision 2026-06-03).
+default-experts: [dave-ulrich, malcolm-knowles, jeff-hiatt, erik-brynjolfsson, amy-edmondson, ravin-jesuthasan, josh-bersin]
+
+# 7 defaults + 1 auto-select slot.
+max-experts: 8
+
+auto-select:
+  - keywords: [autonomy, autonomous, agentic, delegate, automate, ai-safety, alignment, risk, oversight]
+    add: [stuart-russell]
+
+# Mandatory pre-scoring checks (deterministic, not LLM-delegated)
+pre-scoring-checks:
+  - name: table-reconciliation
+    description: |
+      Before any expert scores, extract every numeric claim from the spec's tables
+      (counts, totals, "≥ N", "= N", "exactly N" — e.g. competence counts, capability-spine
+      size, role-slice membership). For each numeric claim, verify it reconciles with the
+      enumerated items in other sections. Flag arithmetic mismatches as CRITICAL findings
+      BEFORE expert deliberation begins. This compensates for the known LLM failure mode of
+      hallucinating arithmetic consistency over freeform tables.
+    when: spec contains 2+ tables with numeric values
+
+scoring:
+  min: 0
+  max: 10
+  pass-threshold: 7.0
+  dimensions:
+    - name: learnability
+      description: "Adult-learning soundness — why-now framing, learner agency, problem-centered, builds on experience (owner: Knowles)"
+    - name: adoption-readiness
+      description: "Individual adoption through ADKAR rungs + psychological safety; barrier point identified and reinforcement sustains the behavior (owners: Hiatt, Edmondson)"
+    - name: human-centeredness
+      description: "Human stays central — trust over surveillance, augmentation over replacement (Turing Trap avoided) (owners: Edmondson, Brynjolfsson)"
+    - name: capability-impact
+      description: "Capability spine integrity + line of sight from individual competence to organizational capability to receiver-defined value (owners: Ulrich, Jesuthasan)"
+
+output:
+  default-format: standard
+  include-scores: true
+  include-roadmap: true
+  include-consensus: true
