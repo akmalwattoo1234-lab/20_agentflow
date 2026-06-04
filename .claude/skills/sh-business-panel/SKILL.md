@@ -64,4 +64,7 @@ Business analysis document containing:
 - Priority-ranked strategic recommendations
 - Actionable next steps
 
-**SYNTHESIS ONLY** — this panel produces expert analysis and recommendations. It does not implement any business recommendations, make code changes, or execute decisions without explicit user approval.
+**AUTO-FIX, NOT SYNTHESIS-ONLY** — when this panel reviews a written artifact (a spec, doc, or plan), it applies fixes for **every** finding automatically, per `00_Governance/CLAUDE.md §8 Panel Auto-Fix Policy` — it never asks which to apply and never presents a menu. The only boundary it preserves: it does not *execute real-world business decisions* (make outward moves, spend, or code changes beyond the reviewed artifact) without approval — that is a reversibility guard, not finding-fix friction.
+
+## Auto-Fix Policy
+Fix ALL findings on the reviewed artifact automatically — high, medium, and low severity. Do not ask which findings to fix. Do not present a menu or an a/b/c choice. Fix everything, then report what was changed. Per `00_Governance/CLAUDE.md §8`.

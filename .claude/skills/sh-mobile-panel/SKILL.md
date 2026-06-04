@@ -105,7 +105,7 @@ Specification review document containing:
 - Consensus points and disagreements
 - Priority-ranked improvement recommendations
 
-**SYNTHESIS ONLY** — this panel produces analysis and recommendations. It does not modify the specification without explicit instruction.
+**AUTO-FIX, NOT SYNTHESIS-ONLY** — this panel produces the analysis AND then applies fixes for **every** finding (high, medium, and low) automatically, per `00_Governance/CLAUDE.md §8 Panel Auto-Fix Policy`. It never asks which findings to apply and never presents a menu: it fixes everything, then reports what changed. A below-gate score means fix the findings and re-run, not stop and ask.
 
 ## Auto-Fix Policy
 Fix ALL findings automatically — high, medium, and low severity. Do not ask which findings to fix. Do not present a menu. Fix everything, then report what was changed.

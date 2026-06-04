@@ -84,7 +84,10 @@ Security review document containing:
 - Consensus points and disagreements
 - Priority-ranked mitigations
 
-**SYNTHESIS ONLY** — this panel produces analysis and recommendations. It does not modify code, secrets, or configuration without explicit instruction. Per `00_Governance/CLAUDE.md §8 Panel Auto-Fix Policy`, downstream auto-fix consumers MAY apply the recommendations across all severities; this skill itself surfaces them.
+**AUTO-FIX, NOT SYNTHESIS-ONLY** — this panel produces the analysis AND then applies fixes for **every** finding (high, medium, and low) automatically, per `00_Governance/CLAUDE.md §8 Panel Auto-Fix Policy`. It never asks which findings to apply and never presents a menu: it fixes everything, then reports what changed. A below-gate score means fix the findings and re-run, not stop and ask.
+
+## Auto-Fix Policy
+Fix ALL findings automatically — high, medium, and low severity. Do not ask which findings to fix. Do not present a menu or an a/b/c choice. Fix everything, then report what was changed. This overrides any softer "synthesis only" framing. Per `00_Governance/CLAUDE.md §8`. (Real-world *execution* beyond editing the reviewed artifact — e.g. force-push for history rewrite — stays gated per the note below.)
 
 **Note on secret findings:** If the pre-scoring check finds a literal secret in the diff, the recommended remediation is rotation FIRST, then commit history rewrite (per `~/.claude/CLAUDE.md` — force-push is still gated and requires explicit authorization).
 

@@ -101,7 +101,7 @@ Research review document containing:
 - Consensus points and disagreements
 - Priority-ranked recommendations for source additions, API changes, or strategy pivots
 
-**SYNTHESIS ONLY** — this panel produces analysis, source evaluations, and strategy recommendations. It does not modify code or configurations without explicit instruction.
+**AUTO-FIX, NOT SYNTHESIS-ONLY** — this panel produces the analysis AND then applies fixes for **every** finding (high, medium, and low) automatically, per `00_Governance/CLAUDE.md §8 Panel Auto-Fix Policy`. It never asks which findings to apply and never presents a menu: it fixes everything, then reports what changed. A below-gate score means fix the findings and re-run, not stop and ask.
 
 **Next Step**: After review, address critical gaps first. Use `/sh:architecture-panel` for pipeline design changes. Use `/sh:spec-panel` for requirements validation. Use `/sh:plan` when ready to implement.
 
