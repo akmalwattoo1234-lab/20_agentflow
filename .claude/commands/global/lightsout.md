@@ -160,7 +160,7 @@ grep -A 100 "^## $(date +%Y-%m-%d)" ~/projects/00_Governance/DONE-Today.md 2>/de
 # Git activity across ALL governed projects (auto-discovered, not hardcoded)
 find ~/projects -maxdepth 2 -name ".git" -type d 2>/dev/null | while read gitdir; do
   d="$(dirname "$gitdir")"
-  echo "=== $(basename "$d") ===" && git -C "$d" log --oneline --since="today" 2>/dev/null
+  echo "=== $(basename "$d") ===" && git -C "$d" log --oneline --since="midnight" 2>/dev/null
 done
 
 # Always exit 0 — empty grep / empty find above would otherwise return non-zero
@@ -176,7 +176,7 @@ Read ALL of the following:
 
 1. **Global DONE-Today.md** — `~/projects/00_Governance/DONE-Today.md` — **only read from today's date heading forward**, not the entire file. Use `grep -A` or read with offset.
 2. **Weekly archives** — `~/projects/00_Governance/done/DONE-*.md` — scan for today's date only
-3. **Git log** — `git log --oneline --since="today"` across governed project directories
+3. **Git log** — `git log --oneline --since="midnight"` across governed project directories
 4. **Todo list** — any completed items from the current session's task tracking
 5. **Task inbox** — recently processed items in `~/projects/00_Governance/task-inbox/`
 
