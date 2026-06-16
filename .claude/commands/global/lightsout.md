@@ -582,7 +582,28 @@ Classify this session's tool calls and report the realized shape. Read-only — 
 # SESSION_TYPE is set by kickoff Step 3b; defaults to execution if absent
 TYPE_FILE=~/.local/state/claude/session-type
 SESSION_TYPE=$(head -1 "$TYPE_FILE" 2>/dev/null || echo "execution")
-python3 ~/projects/00_Governance/scripts/session_shape_audit.py --type "$SESSION_TYPE"
+
+# Resilient-step guard (see 00_Governance/docs/patterns/resilient-step-pattern.md)
+# SHAPE_AUDIT is overridable for testing; defaults to the canonical script path.
+SHAPE_AUDIT="${SHAPE_AUDIT:-$HOME/projects/00_Governance/scripts/session_shape_audit.py}"
+SHAPE_LINE=""
+if [ -r "$SHAPE_AUDIT" ]; then
+  SHAPE_LINE=$(python3 "$SHAPE_AUDIT" --type "$SESSION_TYPE")
+  STATUS=${PIPESTATUS[0]}
+  if [ "$STATUS" -ne 0 ]; then
+    # Script PRESENT but crashed — preserve the failure signal (real bug stays visible)
+    echo "WARNING: session_shape_audit.py exited $STATUS (present but failed)" >&2
+    [ "${LIGHTSOUT_STRICT:-0}" = "1" ] && exit "$STATUS"
+    SHAPE_LINE="n/a (script error — see lightsout.md §Step S)"
+  fi
+else
+  # Script MISSING/unreadable — deterministic absence, degrade gracefully
+  echo "WARNING: session_shape_audit.py missing — audit skipped" >&2
+  [ "${LIGHTSOUT_STRICT:-0}" = "1" ] && exit 1
+  SHAPE_LINE="n/a (script missing — see lightsout.md §Step S)"
+fi
+# $SHAPE_LINE is appended to the HANDOVER "## Session Shape" block written in Step 5
+printf '%s\n' "$SHAPE_LINE"
 ```
 
 The audit prints one line like:
@@ -902,6 +923,24 @@ Per the global CLAUDE.md allowlist (pre-authorized: `KNOWN_PATTERNS.md`, `HANDOV
 # The legacy hermes governance-worktree is a frozen archive mirror — never commit there.
 GW=~/projects/00_Governance
 
+# AC-01/AC-02 (US-GOV-LIGHTSOUT-ALLOWLIST-01): refuse to proceed if anything OFF the
+# Step-5b allowlist is ALREADY staged in the index. The pathspec commit below (AC-03)
+# bounds *this* commit's scope, but pre-staged off-allowlist files are a KP-744
+# laundering vector — a later bare `git commit` anywhere would sweep them in. Detect
+# them up front and STOP (do not commit) so the operator disposes of them explicitly.
+# Allowlist (must mirror the CHANGED build below): BACKLOG.md, KNOWN_PATTERNS.md,
+# HANDOVER-*.md (incl. per-project + merged variants), ics/archive/**.
+STAGED_OFFLIST=$(git -C "$GW" diff --cached --name-only \
+  | grep -vE '^(BACKLOG\.md|KNOWN_PATTERNS\.md|HANDOVER-[^/]*\.md|ics/archive/)' || true)
+if [ -n "$STAGED_OFFLIST" ]; then
+  echo "Step 5b ABORT — off-allowlist files are already staged (KP-744 laundering vector):"
+  echo "$STAGED_OFFLIST" | sed 's/^/  - /'
+  echo "Disposition required before /lightsout can commit governance changes:"
+  echo "  (a) unstage them:  git -C $GW restore --staged <file>   (then re-run /lightsout), or"
+  echo "  (b) commit them manually under their own message, then re-run /lightsout."
+  exit 0   # exit 0 (not non-zero) so a parallel Bash batch sibling is not cancelled
+fi
+
 CHANGED=()
 
 # Modified allowlist files
@@ -952,6 +991,7 @@ exit 0
 ```
 
 Rules:
+- **Pre-staged off-allowlist files abort the commit** (US-GOV-LIGHTSOUT-ALLOWLIST-01, AC-01/02) — before staging anything, Step 5b checks `git diff --cached --name-only` for files outside the allowlist. If any exist, it STOPS, prints the offenders, and instructs the operator to unstage or commit them manually. This closes the laundering vector the pathspec commit (AC-03) alone cannot: pathspec bounds *this* commit's scope, but pre-staged off-list files survive in the index for a later bare commit. Failure mode documented in `00_Governance/docs/lightsout-allowlist-laundering.md` (KP-744).
 - **HANDOVER files are never overwritten** — each session produces a unique timestamped file.
 - **Strict allowlist, not pattern-based** — only `KNOWN_PATTERNS.md`, `BACKLOG.md`, new `HANDOVER-*.md` files (+ per-project variants), and `ics/archive/**` (the one sanctioned pattern-based exception per US-ICS-9 AC-05; rationale in Step 5b body). Adding other files violates the policy Stream A set 2026-04-20.
 - **No split-commit workaround** — if you're tempted to stage a non-allowlist file alongside, STOP and ask the user. Splitting the commit launders permission.
