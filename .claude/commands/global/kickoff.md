@@ -320,6 +320,34 @@ def context_terms(content):
     unresolved = content.count('[unresolved]')
     return terms, unresolved
 
+# TODO Batch Classifier: group items by pattern
+def classify_batches(todo_content):
+    """Group unchecked TODO items into logical batches for batch-first processing."""
+    batches = {
+        'Debt Registration': [],
+        'Debt Skill/Orchestration': [],
+        'Debt Inline-Script': [],
+        'Network/Graph': [],
+        'Features': [],
+    }
+    lines = [l for l in todo_content.split('\n') if l.strip().startswith('- [')]
+    for line in lines:
+        if '[x]' in line or '✓' in line:
+            continue
+        # Classify by pattern
+        if 'US-GOV-DEBT' in line and 'Registration' in line:
+            batches['Debt Registration'].append(line)
+        elif 'DEBT' in line and ('Skill' in line or 'orchestration' in line or 'service-call' in line):
+            batches['Debt Skill/Orchestration'].append(line)
+        elif 'DEBT' in line and 'inline-script' in line:
+            batches['Debt Inline-Script'].append(line)
+        elif 'NETWORK' in line or 'MASTODON' in line or 'GOOGLE-DEVS' in line or 'SPEAKER-NETWORK' in line:
+            batches['Network/Graph'].append(line)
+        else:
+            batches['Features'].append(line)
+    # Remove empty batches
+    return {k: v for k, v in batches.items() if v}
+
 inbox_c   = inbox_count(slurp(f'{ROOT}/INBOX.md'))
 bl_r, bl_f, bl_i, struck, by_state = analyze_backlog(slurp(f'{ROOT}/BACKLOG.md'))
 import os as _os
@@ -330,6 +358,7 @@ done_c    = done_today(slurp(f'{ROOT}/DONE-Today.md'))
 ap        = autopilot(f'{ROOT}/.autopilot')
 retro     = retro_count(slurp(f'{ROOT}/MEMORY.md'))
 ctx_terms, ctx_unres = context_terms(slurp(f'{ROOT}/CONTEXT.md'))
+batches = classify_batches(slurp(f'{ROOT}/{_todo_file}'))
 
 print(f"INBOX={inbox_c}")
 print(f"BACKLOG={bl_i}i/{bl_f}r/{bl_r}R  struck={struck}")
@@ -339,6 +368,8 @@ print(f"AUTOPILOT={ap}")
 print(f"RETRO={retro}")
 print(f"CONTEXT_TERMS={ctx_terms}  unresolved={ctx_unres}")
 print(f"NEXT={nxt}")
+for batch_name, items in batches.items():
+    print(f"BATCH_{batch_name.upper().replace('/', '_').replace('-', '_')}={len(items)}")
 for state in ('Ideation', 'Refining', 'Ready'):
     for us, prio in by_state[state]:
         print(f"{state.upper():<10}  {prio:<3}  {us}")
@@ -358,6 +389,12 @@ For each found:
 - Remove the item (and all its indented sub-lines) from `BACKLOG.md`
 - Count removals per section
 
+**Two archive files exist — always check both:**
+- `$ROOT/BACKLOG-ARCHIVE.md` — written by the sweep pipeline (`backlog_add.py`, `rudi_heartbeat`) and manual operator deletions
+- `$ROOT/done/BACKLOG-ARCHIVE.md` — written by this Step 2a grooming pass
+
+When verifying whether a TODO-queue item is already archived (auto-drain check), grep BOTH files. An item found in either counts as archived. A check against only `done/BACKLOG-ARCHIVE.md` will produce false-negatives for everything archived via the sweep pipeline.
+
 **2b. Duplicate scan (read-only):**
 Within each section, check for items that share a title keyword match. Flag duplicates in the report — do NOT auto-merge.
 
@@ -367,10 +404,16 @@ From the Step 1 output:
 - Refining items with a date > 14 days ago and no spec link → flag as stale
 - Items referencing deprecated platforms → flag as platform-blocked
 
+**2c.5. Stale-claim scan (event-log backed):**
+Run `python3 ~/projects/00_Governance/scripts/backlog_add.py stale-scan` and read its
+JSON `count`. This is additive to 2c (which owns Ideation/Refining date-staleness) — 2c.5
+owns *claimed WIP gone quiet*. It files at most one deduped rollup US (`[stale-claim]`);
+skip-if-open means re-runs never churn. Surface the count on the 2d GROOMING line.
+
 **2d. Report:**
 ```
 GROOMING:    {N} archived ({N} Ideation, {N} Refining, {N} Ready)
-             {N} stale · {N} duplicates · {N} platform-blocked
+             {N} stale · {N} stale-claim · {N} duplicates · {N} platform-blocked
              (or "Clean — no action needed")
 ```
 
@@ -435,7 +478,7 @@ This step is the structural commitment. Mid-session drift to a different type (e
 
 ### Step 4 — Produce summary
 
-Print this summary (adapt counts from Step 1 output):
+Print this summary (adapt counts from Step 1 output). **NEW: If batches exist, show them before QUEUE details:**
 
 ```
 KICKOFF — {PROJECT} — {YYYY-MM-DD}
@@ -447,6 +490,11 @@ BACKLOG:     {N} Ideation · {N} Refining · {N} Ready
              Refining:  {prio}  {US-ID}
              Ready:     {prio}  {US-ID}
 GROOMING:    {grooming summary from Step 2d}
+BATCHES:     Batch 1 (Debt Registration): {N} items
+             Batch 2 (Debt Skill/Orch): {N} items
+             Batch 3 (Debt Inline-Script): {N} items
+             Batch 4 (Network/Graph): {N} items
+             Batch 5 (Features): {N} items
 QUEUE:       {N} unchecked ({N} done today)
 AUTOPILOT:   {state}
 RETRO:       {N}/10 stories until next retro
@@ -455,17 +503,24 @@ DOMAIN:      {N terms in CONTEXT.md, or "No CONTEXT.md — create during next /s
 ════════════════════════════════════════
 ```
 
-Omit a state block entirely if it has 0 items.
+**Batch summary rules:**
+- Show BATCHES section only if 2+ batches exist (single batch = no need for batch framing)
+- Order batches in priority (Debt Registration first, Features last)
+- Omit zero-count batches entirely
+- Omit other state blocks if they have 0 items
 
 ### Step 5 — Suggest next action
+
+**BATCH-FIRST default:** If Step 4 shows 2+ batches, recommend processing the highest-priority batch before individual items.
 
 Based on the state, suggest exactly ONE next action:
 
 | Condition | Suggestion |
 |-----------|-----------|
+| Queue has 2+ batches | "→ **Batch-first:** Process Batch 1 ({name}, {N} items) before other work. Within batch: `/sh:execute` with autopilot enabled." |
 | INBOX has items | "→ Run `/triage` to process {N} INBOX items" |
 | INBOX empty + Ready items exist + Queue empty | "→ Run `/workflow` to queue {N} Ready items (#{N}: {title})" |
-| Queue has unchecked items | "→ Resume queue. Next: **{task description}**" |
+| Queue has unchecked items (single batch or no batching) | "→ Resume queue. Next: **{task description}**" |
 | Queue has unchecked + autopilot=run | "→ Autopilot is active. Next task: **{task description}**" |
 | Queue has unchecked + autopilot=pause | "→ Autopilot paused. Write `run` to `.autopilot` to resume, or pick up manually" |
 | Everything empty | "→ Check ROADMAP.md for next initiative to refine" |
@@ -473,7 +528,7 @@ Based on the state, suggest exactly ONE next action:
 | Governance BACKLOG has higher-priority items | "→ **Cross-project priority:** {item} outranks local queue" |
 | Stale items > 5 | "→ Run `/backlog-grooming` for full staleness + orphan review" |
 
-If multiple conditions apply, prioritize: retro due > cross-project > INBOX > Queue > Ready > stale > empty.
+If multiple conditions apply, prioritize: retro due > cross-project > batches > INBOX > Queue > Ready > stale > empty.
 
 ### Step 6 — STOP
 
@@ -503,7 +558,7 @@ When `--dry-run` is passed, **do not scan files or archive items**. Instead, out
 |--------|--------|-------------------|
 | discover | `find . -maxdepth 3 -name BACKLOG.md` | Locate pipeline root (Step 0) |
 | analyze | `$ROOT/{INBOX,BACKLOG,TODO-Today,DONE-Today,MEMORY,CONTEXT}.md` | Single-script stats (Step 1) |
-| archive | `BACKLOG.md` → `done/BACKLOG-ARCHIVE.md` | Remove shipped/struck-through items (Step 2a — only write operation) |
+| archive | `BACKLOG.md` → `done/BACKLOG-ARCHIVE.md` | Remove shipped/struck-through items (Step 2a — only write operation). Auto-drain check greps BOTH `BACKLOG-ARCHIVE.md` (root, sweep pipeline) AND `done/BACKLOG-ARCHIVE.md` (grooming pass). |
 | sync | `paperclip_backlog_sync.py` (if exists) | Reconcile Paperclip → BACKLOG |
 | query | QMD context + cross-project (parallel) | Surface relevant specs and cross-project priorities |
 | report | stdout | Summary + single next-action suggestion |
