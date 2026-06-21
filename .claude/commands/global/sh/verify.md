@@ -124,5 +124,5 @@ This is non-negotiable.
 
 **Used by:**
 - **`/sh:execute`** - Verification gates between tasks
-- **`/sh:finish`** - Must verify before presenting completion options
+- **`superpowers:finishing-a-development-branch`** - Must verify before presenting completion options
 - **`/sh:tdd`** - Red-green verification is a subset of this principle

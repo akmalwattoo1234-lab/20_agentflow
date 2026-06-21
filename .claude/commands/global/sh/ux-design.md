@@ -133,7 +133,7 @@ When multiple concepts exist, generate comparison. Read `concept-compare.md` for
 ```
 Panel debates which concept better serves strategy. Christensen (JTBD fit), Godin (adoption friction), Taleb (what breaks), Meadows (system leverage).
 
-**Decision:** User picks winner. Merge winning branch. Delete losing branches. Clean up worktrees via `/sh:finish`.
+**Decision:** User picks winner. Merge winning branch. Delete losing branches. Clean up worktrees via `superpowers:finishing-a-development-branch`.
 
 ## Phase 8: Graduation Gate
 
@@ -166,7 +166,7 @@ Before handing off to `/frontend-design`, ALL must pass. Read `handoff.md` for d
 | `/sh:worktree` | Called in Phase 4+6 — isolation per concept |
 | `/sh:review` | Called in Phase 5 — self-review wireframe against flow |
 | `/sh:verify` | Called in Phase 8 — evidence-based graduation check |
-| `/sh:finish` | Called after concept decision — cleanup losing branches |
+| `superpowers:finishing-a-development-branch` | Called after concept decision — cleanup losing branches |
 | `/frontend-design` | Downstream — builds hi-fi on wireframe foundation |
 
 ## Key Principles

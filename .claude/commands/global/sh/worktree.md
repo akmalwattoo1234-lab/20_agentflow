@@ -180,4 +180,4 @@ Ready to implement <feature-name>
 - **`/sh:parallel`** - Isolation for parallel agent work
 
 **Pairs with:**
-- **`/sh:finish`** - Cleans up worktree after work complete
+- **`superpowers:finishing-a-development-branch`** - Cleans up worktree after work complete

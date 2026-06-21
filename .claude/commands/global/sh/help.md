@@ -38,7 +38,7 @@ Print the following command reference exactly:
 | `/sh:tdd` | Test-driven development — red/green/refactor cycle |
 | `/sh:verify` | Run verification suite and report pass/fail status |
 | `/sh:review` | Code review with actionable feedback and severity ratings |
-| `/sh:finish` | Finalize deliverable — commit, update docs, move to DONE |
+| `superpowers:finishing-a-development-branch` | Finalize deliverable — commit, update docs, move to DONE |
 | `/sh:worktree` | Manage git worktrees for parallel development branches |
 | `/sh:parallel` | Execute independent tasks concurrently across worktrees |
 

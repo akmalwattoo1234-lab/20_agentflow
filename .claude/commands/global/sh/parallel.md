@@ -133,5 +133,5 @@ After agents return:
 - **`/sh:execute`** - Individual agents follow execution skill
 - **`/sh:tdd`** - Each agent follows TDD within their scope
 - **`/sh:verify`** - Verification after integration
-- **`/sh:finish`** - Complete the branch after all agents finish
+- **`superpowers:finishing-a-development-branch`** - Complete the branch after all agents finish
 - **`/sh:worktree`** - Worktrees can isolate parallel agent work
