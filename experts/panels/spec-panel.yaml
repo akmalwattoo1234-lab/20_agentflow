@@ -70,6 +70,21 @@ scoring:
       description: "Measurability and validation capability"
     - name: consistency
       description: "Internal coherence and contradiction detection"
+    - name: public-readiness
+      description: |
+        Would this spec survive being opened on a public GitHub repo without
+        earning ridicule from a competent stranger? Two lenses:
+        (1) OSS hygiene — does it call for a README, LICENSE, runnable
+            install/usage steps, at least one worked example, and tests/CI?
+            Is anything missing that a reviewer judges in the first 30 seconds?
+        (2) Design credibility — are there amateur tells? Hardcoded absolute
+            paths, secrets in code, no error handling, bare excepts, reinvented
+            stdlib, no separation of concerns, "happy path only". Flag each as
+            a finding the same way other dimensions do.
+        Weight by actual public intent: a clearly internal-only spec should
+        not be hammered for lacking public packaging. Score low when the spec
+        would embarrass the author in public; high when a skeptical peer would
+        say "this is solid, I'd star it."
 
   # Production-readiness dimensions — applied ONLY when the spec describes
   # an LLM-app, multi-agent pipeline, spec-gated workflow, or AI-driven tool.

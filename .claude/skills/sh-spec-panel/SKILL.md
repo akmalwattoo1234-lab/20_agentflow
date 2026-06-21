@@ -57,14 +57,15 @@ Learning-focused questioning to deepen understanding. Experts pose foundational 
 
 ## Scoring Gate
 
-4 dimensions, each scored 0-10:
+5 dimensions, each scored 0-10:
 
-| Dimension     | Description                                    |
-|---------------|------------------------------------------------|
-| Clarity       | Language precision and understandability        |
-| Completeness  | Coverage of essential specification elements   |
-| Testability   | Measurability and validation capability        |
-| Consistency   | Internal coherence and contradiction detection |
+| Dimension         | Description                                                              |
+|-------------------|-------------------------------------------------------------------------|
+| Clarity           | Language precision and understandability                                 |
+| Completeness      | Coverage of essential specification elements                            |
+| Testability       | Measurability and validation capability                                 |
+| Consistency       | Internal coherence and contradiction detection                          |
+| Public-readiness  | Would this survive a public GitHub repo without ridicule — OSS hygiene (README, LICENSE, install/usage, examples, tests/CI) + design credibility (no hardcoded paths, secrets, bare excepts, happy-path-only). Weighted by actual public intent. |
 
 **Pass threshold: overall score >= 7.0**
 
